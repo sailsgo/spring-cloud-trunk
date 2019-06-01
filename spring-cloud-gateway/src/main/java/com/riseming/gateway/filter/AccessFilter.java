@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @desc: 如何过滤请求到达我们的代理服务
@@ -32,9 +33,8 @@ public class AccessFilter  extends ZuulFilter {
         String token = request.getParameter("token");
         if (StringUtils.isEmpty(token)) {
             logger.warn("access token is empty");
-            ctx.setSendZuulResponse(false);
-            ctx.setResponseStatusCode(401);
-            ctx.setResponseBody(JSONObject.toJSONString(new ResultBean("Authentication failed,Please input token params")));
+            ctx.set("error.status_code", HttpServletResponse.SC_UNAUTHORIZED);
+            ctx.set("error.message","UnAuthorized,please input token");
             return null;
         }
         logger.info("access token ok");
@@ -50,7 +50,7 @@ public class AccessFilter  extends ZuulFilter {
      */
     @Override
     public int filterOrder() {
-        return 0;
+        return -10;
     }
 
     /**
